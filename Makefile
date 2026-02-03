@@ -244,7 +244,8 @@ else ifeq ("riscv32", $(MK_ARCH))
 else ifeq ("riscv64", $(MK_ARCH))
   export HOST_ARCH=$(HOST_ARCH_RISCV64)
 endif
-undefine MK_ARCH
+unexport MK_ARCH
+MK_ARCH :=
 
 # Call a source code checker (by default, "sparse") as part of the
 # C compilation.
@@ -581,14 +582,6 @@ export CC_VERSION_TEXT := $(shell $(CC) --version | head -n 1)
 # tree rather than in the kernel tree. The kernel tree might
 # even be read-only.
 export MODVERDIR := $(if $(KBUILD_EXTMOD),$(firstword $(KBUILD_EXTMOD))/).tmp_versions
-
-# Files to ignore in find ... statements
-
-export RCS_FIND_IGNORE := \( -name SCCS -o -name BitKeeper -o -name .svn -o    \
-			  -name CVS -o -name .pc -o -name .hg -o -name .git \) \
-			  -prune -o
-export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
-			 --exclude CVS --exclude .pc --exclude .hg --exclude .git
 
 export PYTHON_ENABLE
 
@@ -1036,28 +1029,6 @@ KBUILD_LDFLAGS  += -z norelro
 KBUILD_LDFLAGS  += $(call ld-option,--no-warn-rwx-segments)
 
 KBUILD_HOSTCFLAGS += $(if $(CONFIG_TOOLS_DEBUG),-g)
-
-# Use UBOOTINCLUDE when you must reference the include/ directory.
-# Needed to be compatible with the O= option
-UBOOTINCLUDE    := \
-	-Iinclude \
-	$(if $(building_out_of_srctree), -I$(srctree)/include) \
-	$(if $(CONFIG_$(XPL_)MBEDTLS_LIB), \
-		"-DMBEDTLS_CONFIG_FILE=\"mbedtls_def_config.h\"" \
-		-I$(srctree)/lib/mbedtls \
-		-I$(srctree)/lib/mbedtls/port \
-		-I$(srctree)/lib/mbedtls/external/mbedtls \
-		-I$(srctree)/lib/mbedtls/external/mbedtls/include) \
-	$(if $(CONFIG_$(PHASE_)SYS_THUMB_BUILD), \
-		$(if $(CONFIG_HAS_THUMB2), \
-			$(if $(CONFIG_CPU_V7M), \
-				-I$(srctree)/arch/arm/thumb1/include), \
-			-I$(srctree)/arch/arm/thumb1/include)) \
-	-I$(srctree)/arch/$(ARCH)/include \
-	-include $(srctree)/include/linux/kconfig.h \
-	-I$(srctree)/dts/upstream/include \
-	$(if $(CONFIG_NET_LWIP), -I$(srctree)/lib/lwip/lwip/src/include \
-		-I$(srctree)/lib/lwip/u-boot)
 
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 
